@@ -12,7 +12,7 @@ This project makes uses of certain externally licensed works, including PHP Font
 
 ### Demo
 
-  - http://favicon.tsukuba42195.top/
+  - https://favicon.tsukuba42195.top/
 
 
 ### Licence
