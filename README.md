@@ -1,4 +1,4 @@
-## Use Font Awesome Icon As Favicon
+## Use Font Awesome Icons As Favicon
 
 A simple PHP application to convert Font Awesome Icons to favicon.
 
@@ -12,9 +12,9 @@ This project makes uses of certain externally licensed works, including PHP Font
 
 ### Demo
 
-  - https://favicon.tsukuba42195.top/
+  - http://s0323861.moo.jp/tools/fontawesomeicons_to_favicon/
 
 
 ### Licence
 
-  - Copyright 2015 Akira Mukai. Licensed under the MIT License
+  - Copyright 2021 Akira Mukai. Licensed under the MIT License
