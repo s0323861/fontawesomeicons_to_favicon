@@ -8,7 +8,7 @@ if ($fp){
   $cnt = 0;
     while (!feof($fp)) {
       $buffer = fgets($fp);
-      $strbuf = split(":", $buffer);
+      $strbuf = explode(":", $buffer);
       // 文字列の比較をしてから抽出する
       if(strstr($strbuf[0], 'fa-var-')){
         $arrybuf[$cnt]  = substr($strbuf[0], 8, strlen($strbuf[0]) - 8);
