@@ -5,6 +5,9 @@
 ![Bootstrap](https://img.shields.io/badge/Bootstrap-5.3-%237952B3.svg?style=flat&logo=bootstrap&logoColor=white)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 
+
+[![OGP](ogp.png)]([https://tsukuba42195.sakura.ne.jp/moshi/](https://tsukuba42195.sakura.ne.jp/fontawesome_to_favicon/))
+
 Font Awesome Iconsをfavicon（ファビコン）に簡単に変換できるツールです。
 UIを **Bootstrap 5** にアップデートしました。スマートフォンにも対応しています。
 
