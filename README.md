@@ -12,7 +12,7 @@ UIを **Bootstrap 5** にアップデートし、よりモダンでレスポン�
 
 ## 📸 デモ (Demo)
 
-![Application Demo](demo.png)
+![Application Demo](demo.gif)
 
 実際の動作は以下のURLから確認できます：
 👉 [https://tsukuba42195.sakura.ne.jp/fontawesome_to_favicon/](https://tsukuba42195.sakura.ne.jp/fontawesome_to_favicon/)
