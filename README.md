@@ -5,8 +5,8 @@
 ![Bootstrap](https://img.shields.io/badge/Bootstrap-5.3-%237952B3.svg?style=flat&logo=bootstrap&logoColor=white)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 
-Font Awesome Iconsをfavicon（ファビコン）に簡単変換できる、シンプルなPHPアプリケーションです。
-UIを **Bootstrap 5** にアップデートし、よりモダンでレスポンシブなインターフェースに対応しました。
+Font Awesome Iconsをfavicon（ファビコン）に簡単に変換できるツールです。
+UIを **Bootstrap 5** にアップデートしました。スマートフォンにも対応しています。
 
 ---
 
@@ -29,9 +29,9 @@ UIを **Bootstrap 5** にアップデートし、よりモダンでレスポン�
 
 ## 🛠️ クレジット・外部ライブラリ (Credits & External Libraries)
 
-本プロジェクトでは、以下の外部ライブラリ等を使用しています：
+本プロジェクトでは、以下の外部ライブラリ・ttfファイルを使用しています：
 * [Bootstrap 5](https://getbootstrap.com/)
-* jQuery
+* [Font Awesome 6.7.2](https://github.com/FortAwesome/Font-Awesome/tree/fa-release-6.7.2/webfonts)
 
 これらの作品は、その後に変更が加えられている場合であっても、オリジナルのライセンスが適用されます。
 
