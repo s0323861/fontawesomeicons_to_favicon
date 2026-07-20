@@ -30,7 +30,6 @@ UIを **Bootstrap 5** にアップデートし、よりモダンでレスポン�
 ## 🛠️ クレジット・外部ライブラリ (Credits & External Libraries)
 
 本プロジェクトでは、以下の外部ライブラリ等を使用しています：
-* PHP Font Awesome to PNG
 * [Bootstrap 5](https://getbootstrap.com/)
 * jQuery
 
