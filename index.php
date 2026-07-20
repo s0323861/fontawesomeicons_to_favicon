@@ -1,228 +1,287 @@
 <?php
 
-// fontawesomeのアイコン一覧を表示させる
-$fp = fopen('_variables.scss', 'r');
+$fa = $_POST["btn"];
+$fa = urldecode($fa);
 
-if ($fp){
-    $cnt = 0;
-    while (!feof($fp)) {
-        $buffer = fgets($fp);
-        $strbuf = explode(":", $buffer);
-        // 文字列の比較をしてから抽出する
-        if(strstr($strbuf[0], 'fa-var-')){
-            $arrybuf[$cnt]  = substr($strbuf[0], 8, strlen($strbuf[0]) - 8);
+// PHP Font Awesome to PNG
+include("icons.data.php");
 
-            if($cnt == 0){
-                // 先頭のボタンにはチェックを付ける（Bootstrap 5のボタンラジオ仕様）
-                $tag_fa = "<input type=\"radio\" class=\"btn-check\" name=\"btn\" id=\"btn-" . $arrybuf[$cnt] . "\" value=\"" . $arrybuf[$cnt] . "\" autocomplete=\"off\" checked>\n";
-                $tag_fa .= "<label class=\"btn btn-outline-secondary m-1 fa-icon-label\" for=\"btn-" . $arrybuf[$cnt] . "\" data-bs-toggle=\"tooltip\" data-bs-placement=\"top\" data-bs-title=\"" . $arrybuf[$cnt] . "\"><i class=\"fa fa-" . $arrybuf[$cnt] . " fa-fw\"></i>" . "<span style=\"display:none;\">" . $arrybuf[$cnt] . "</span></label>\n";
-            }else{
-                // faのボタン（タグ）を作成する
-                $tag_fa .= "<input type=\"radio\" class=\"btn-check\" name=\"btn\" id=\"btn-" . $arrybuf[$cnt] . "\" value=\"" . $arrybuf[$cnt] . "\" autocomplete=\"off\">\n";
-                $tag_fa .= "<label class=\"btn btn-outline-secondary m-1 fa-icon-label\" for=\"btn-" . $arrybuf[$cnt] . "\" data-bs-toggle=\"tooltip\" data-bs-placement=\"top\" data-bs-title=\"" . $arrybuf[$cnt] . "\"><i class=\"fa fa-" . $arrybuf[$cnt] . " fa-fw\"></i>" . "<span style=\"display:none;\">" . $arrybuf[$cnt] . "</span></label>\n";
-            }
+// 3つのフォントファイルをスタイル別に定義
+// サーバー上の実際の配置パス・ファイル名に合わせて調整してください
+$fontFiles = [
+    'solid'   => './fa-solid-900.ttf',
+    'regular' => './fa-regular-400.ttf',
+    'brands'  => './fa-brands-400.ttf'
+];
 
-            $cnt = $cnt + 1;
+// 色の指定(favicon color)
+$colorcode = $_POST["color"];
+$colorcode = preg_replace("/#/", "", $colorcode);
+// can not use 255,0,255 as it is reserved color for background triming
+if(strtolower($colorcode) == "ff00ff"){
+  $colorcode = "000000";
+}
+// 「******」という形になっているはずなので、2つずつ「**」に区切る
+// そしてhexdec関数で変換して配列に格納する
+$array_colorcode['red'] = hexdec(substr($colorcode, 0, 2));
+$array_colorcode['green'] = hexdec(substr($colorcode, 2, 2));
+$array_colorcode['blue'] = hexdec(substr($colorcode, 4, 2));
 
-        // versionの取得
-        }elseif(strstr($strbuf[0], 'fa-version')){
-            $version = substr($strbuf[1], $of = strpos($strbuf[1], '"') + 1, strrpos($strbuf[1], '"') - $of);
-        }
-    }
+// サイズの指定(favicon size)
+$outputSize = $_POST["size"];
+
+// 出力先(destination folder name)
+$outputDir = './output/' . $outputSize;
+
+$size = $width = $height = $outputSize*3;
+$fontSize = $outputSize;
+$padding = (int)ceil(($outputSize/25));
+
+// The text to draw
+foreach($icons as $iKey=>$iParam)
+{
+  if($iKey != $fa) continue;
+
+  // 【変更点】HTMLエンティティ（&#xe494;など）をUTF-8文字列にデコード
+  $text = html_entity_decode($iParam['code'], ENT_QUOTES, 'UTF-8');
+
+  // 【プランB変更点】アイコンのstyle属性（solid/regular/brands）を取得
+  $iconStyle = isset($iParam['style']) ? $iParam['style'] : 'solid';
+
+  // 【プランB変更点】該当するフォントファイルを自動選択（存在しないスタイル名はsolidにフォールバック）
+  $font = isset($fontFiles[$iconStyle]) ? $fontFiles[$iconStyle] : $fontFiles['solid'];
+  
+  $fileName = sprintf("%s/%s.png", $outputDir, $iKey); 
+  $dirPath = dirname($fileName);
+  
+  if(!is_dir($dirPath) || !file_exists($dirPath))
+  {
+    mkdir_recursive($dirPath, 0777);
+  }
+  
+  // Create the image
+  $im = imagecreatetruecolor($width, $height);
+  imagealphablending($im, false);
+
+  // Create some colors
+  $fontC = imagecolorallocate($im, $array_colorcode['red'], $array_colorcode['green'], $array_colorcode['blue']);
+
+  $bgc = imagecolorallocatealpha($im, 255, 0, 255, 127);
+  imagefilledrectangle($im, 0, 0, $width,$height, $bgc);
+  imagealphablending($im, true);
+
+  // Add the text
+  list($fontX, $fontY) = ImageTTFCenter($im, $text, $font, $fontSize);
+  imagettftext($im, $fontSize, 0, $fontX, $fontY, $fontC, $font, $text);
+
+  // Using imagepng() results in clearer text compared with imagejpeg()
+  imagealphablending($im,false);
+  imagesavealpha($im,true);
+  imagetrim($im, $bgc, $padding);
+  imagecanvas($im, $outputSize, $bgc, $padding);
+  imagepng($im, $fileName);
+  imagedestroy($im);
+
+  // 【重要】目的のアイコンを生成したら、ここでループを強制終了してパスを保持する
+  break;
 }
 
-fclose($fp);
+// フォーマット(ico or png)
+$format = $_POST["format"];
+
+if (file_exists($fileName)) {
+    if($format == "ico"){
+        $destination = $outputDir . '/' . $fa . '.ico';
+        
+        // 【外部ライブラリ不使用】PNGデータをダイレクトにICOバイナリへラップする
+        $png_data = file_get_contents($fileName);
+        $png_size = strlen($png_data);
+        
+        // ICOファイルのヘッダーをバイナリで構築 (1アイコン、幅/高は $outputSize)
+        // 幅・高さが256以上の場合はバイナリ上 0 を指定する仕様
+        $ico_w = ($outputSize >= 256) ? 0 : $outputSize;
+        $ico_h = ($outputSize >= 256) ? 0 : $outputSize;
+        
+        $ico_header = pack("vvv", 0, 1, 1); // Reserved(0), Type(1=ICO), Count(1)
+        $ico_dir    = pack("CCCCvvVV", 
+            $ico_w,         // Width
+            $ico_h,         // Height
+            0,              // Color Count
+            0,              // Reserved
+            1,              // Color Planes
+            32,             // Bits per pixel (32bit)
+            $png_size,      // Size of PNG data
+            22              // Offset of PNG data (Header 6 bytes + Dir 16 bytes = 22)
+        );
+        
+        // ヘッダー + ディレクトリ構造 + PNG本体 を結合してICOとして保存
+        file_put_contents($destination, $ico_header . $ico_dir . $png_data);
+        
+        // 元ネタのPNGファイルはここで削除
+        unlink($fileName); 
+    } else {
+        $destination = $fileName;
+    }
+} else {
+    die("エラー: 元となるPNG画像（" . $fileName . "）が見つかりません。");
+}
+
+// ファイル名(file name)
+if($format == "ico"){
+  $fname = $fa . '.ico';
+}else{
+  $fname = $fa . '.png';
+}
+
+// ダウンロードの処理(download)
+header('Content-Type: application/force-download');
+header('Content-Length: ' . filesize($destination));
+header('Content-disposition: attachment; filename="' . $fname . '"');
+readfile($destination);
+
+// ダウンロード後に最終出力ファイルを削除する(delete files)
+unlink($destination);
+
+
+
+function mkdir_recursive($pathname, $mode)
+{
+    is_dir(dirname($pathname)) || mkdir_recursive(dirname($pathname), $mode);
+    return is_dir($pathname) || @mkdir($pathname, $mode);
+}
+
+function ImageTTFCenter($image, $text, $font, $size, $angle = 45) 
+{
+    $xi = imagesx($image);
+    $yi = imagesy($image);
+
+    // First we create our bounding box for the first text
+    $box = imagettfbbox($size, $angle, $font, $text);
+
+    $xr = abs(max($box[2], $box[4]));
+    $yr = abs(max($box[5], $box[7]));
+
+    // compute centering
+    $x = intval(($xi - $xr) / 2);
+    $y = intval(($yi + $yr) / 2);
+
+    //echo $x;echo '|';  echo $y;exit;
+    return array($x, $y);
+}
+
+function imagetrim(&$im, $bg, $pad=null){
+
+    // Calculate padding for each side.
+    if (isset($pad)){
+        $pp = explode(' ', $pad);
+        if (isset($pp[3])){
+            $p = array((int) $pp[0], (int) $pp[1], (int) $pp[2], (int) $pp[3]);
+        }else if (isset($pp[2])){
+            $p = array((int) $pp[0], (int) $pp[1], (int) $pp[2], (int) $pp[1]);
+        }else if (isset($pp[1])){
+            $p = array((int) $pp[0], (int) $pp[1], (int) $pp[0], (int) $pp[1]);
+        }else{
+            $p = array_fill(0, 4, (int) $pp[0]);
+        }
+    }else{
+        $p = array_fill(0, 4, 0);
+    }
+
+    // Get the image width and height.
+    $imw = imagesx($im);
+    $imh = imagesy($im);
+
+    // Set the X variables.
+    $xmin = $imw;
+    $xmax = 0;
+
+    // Start scanning for the edges.
+    for ($iy=0; $iy<$imh; $iy++){
+        $first = true;
+        for ($ix=0; $ix<$imw; $ix++){
+            $ndx = imagecolorat($im, $ix, $iy);
+            if ($ndx != $bg){
+                if ($xmin > $ix){ $xmin = $ix; }
+                if ($xmax < $ix){ $xmax = $ix; }
+                if (!isset($ymin)){ $ymin = $iy; }
+                $ymax = $iy;
+                if ($first){ $ix = $xmax; $first = false; }
+            }
+        }
+    }
+
+    // The new width and height of the image. (not including padding)
+    $imw = 1+$xmax-$xmin; // Image width in pixels
+    $imh = 1+$ymax-$ymin; // Image height in pixels
+
+    // Make another image to place the trimmed version in.
+    $im2 = imagecreatetruecolor($imw+$p[1]+$p[3], $imh+$p[0]+$p[2]);
+
+    // Make the background of the new image the same as the background of the old one.
+    $bg2 = imagecolorallocatealpha($im2, ($bg >> 16) & 0xFF, ($bg >> 8) & 0xFF, $bg & 0xFF, 127);
+    imagefill($im2, 0, 0, $bg2);
+  imagealphablending($im2, true);
+
+    // Copy it over to the new image.
+    imagecopy($im2, $im, $p[3], $p[0], $xmin, $ymin, $imw, $imh);
+
+    // To finish up, we replace the old image which is referenced.
+    imagealphablending($im2,false);
+    imagesavealpha($im2,true);
+    $im = $im2;
+    //imagedestroy($im2);
+}
+
+function imagecanvas(&$im, $size, $bg, $padding)
+{
+  $srcW = imagesx($im);
+  $srcH = imagesy($im);
+  
+  $srcRatio = $srcW/$srcH;
+  
+  $im2 = imagecreatetruecolor($size, $size);
+  $bg2 = imagecolorallocatealpha($im2, ($bg >> 16) & 0xFF, ($bg >> 8) & 0xFF, $bg & 0xFF, 127);
+  //imagefilledrectangle($im2, 0, 0, $size,$size, $bg2);
+  imagefill($im2, 0, 0, $bg2);
+  imagealphablending($im2, true);
+  
+  // init
+  $dstX = $dstY = $srcX = $srcY = 0;
+  $dstW = $dstH = $size;
+
+  // if source size is smaller than output size
+  if($srcW < $size && $srcH < $size)
+  {
+    $dstW = $srcW; $dstH = $srcH;
+  }
+  // if source is bigger than output
+  else
+  {
+    // use padding
+    // if horizontal long
+    if($srcW > $srcH)
+    {
+      $dstW = $size - $padding;
+      $dstH = (int)(($dstW/$srcW)*$srcH);
+    }
+    // if vertically long or equal(square)
+    else
+    {
+      $dstH = $size - $padding;
+      $dstW = (int)(($dstH/$srcH)*$srcW);
+    }  
+  }
+  
+  $dstX = (int)(($size - $dstW)/2);
+  $dstY = (int)(($size - $dstH)/2);
+  
+  // imagecopyresampled ( resource $dst_image , resource $src_image , int $dst_x , int $dst_y , int $src_x , int $src_y , int $dst_w , int $dst_h , int $src_w , int $src_h )
+  imagecopyresampled($im2, $im, $dstX, $dstY, $srcX, $srcY, $dstW, $dstH, $srcW, $srcH);
+  
+  imagealphablending($im2,false);
+  imagesavealpha($im2,true);
+  $im = $im2;
+  //imagedestroy($im2);
+}
 
 ?>
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Font Awesomeのアイコンからファビコン(favicon)を作成するツールです。色、サイズを選択して変換可能です。This online tool is to create favicon files from Font Awesome Icons.">
-<meta name="keywords" content="font awesome,変換,favicon,ICO,free,converter">
-<meta name="author" content="向井聡">
-<title>Font Awesomeのアイコンからfaviconを作成します - Use Font Awesome Icon As Favicon</title>
-  <link rel="shortcut icon" href="./favicon.ico">
-  <!-- Bootstrap 5 CSS (CDN経由の例。ローカル配置の場合はパスを変更してください) -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/class/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-  
-  <style type="text/css">
-  body { padding-top: 80px; }
-  /* 検索等で非表示にするためのクラス */
-  .d-none-important { display: none !important; }
-  </style>
-</head>
-<body>
-
-<header>
-  <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top border-bottom">
-    <div class="container">
-      <a href="./" class="navbar-brand"><i class="fa fa-wrench"></i> Faviconツクール</a>
-    </div>
-  </nav>
-</header>
-
-<div class="container">
-
-  <div class="row my-4">
-    <div class="col-12">
-      <h1 class="border-bottom pb-2">
-        <i class="fa fa-flask"></i> Use Font Awesome Icon As Favicon<br>
-        <small class="text-muted fs-5">Font Awesome Iconsからfaviconを作成します！</small>
-      </h1>
-    </div>
-  </div>
-
-  <!-- Forms ================================================== -->
-  <form action="./download.php" method="post">
-    <fieldset>
-      <div class="row">
-
-        <div class="col-md-6 mb-4">
-          <div class="card card-body bg-light">
-            <div class="mb-3">
-              <label for="faSearch" class="form-label font-weight-bold">
-                faviconにするアイコンを1つ選択してください。<br>
-                <span class="text-muted">(Please choose an icon below that converts to a favicon.)</span>
-              </label>
-
-              <div class="input-group mb-3">
-                  <span class="input-group-text" id="basic-addon"><i class="fa fa-filter"></i></span>
-                  <input type="text" name="faSearch" id="faSearch" class="form-control" aria-describedby="basic-addon" placeholder="Search icons">
-              </div>
-
-              <div id="fa" class="d-flex flex-wrap layout-buttons">
-                <?php echo $tag_fa; ?>
-              </div>
-            </div>
-            <p class="mb-0 text-secondary">version: <?php echo $version; ?></p>
-          </div>
-        </div>
-
-        <div class="col-md-6 mb-4">
-          <div class="card card-body bg-light mb-3">
-            <div class="mb-3">
-              <label for="select-size" class="form-label">サイズ(size)</label>
-              <select class="form-select" name="size" id="select-size">
-                <option>16</option>
-                <option>24</option>
-                <option>32</option>
-                <option>48</option>
-                <option>64</option>
-                <option>96</option>
-                <option>128</option>
-                <option>256</option>
-              </select>
-            </div>
-
-            <div class="mb-3">
-              <label for="color-text" class="form-label">色(color)</label>
-              <div class="input-group">
-                <!-- テキスト入力欄 -->
-                <input type="text" id="color-text" name="color" value="#000000" class="form-control" placeholder="#000000" maxlength="7">
-                <!-- カラーピッカー（ボタンの代わり） -->
-                <input type="color" id="color-picker" value="#000000" class="form-control form-control-color" style="width: 50px; max-width: 50px; padding: 6px;">
-              </div>
-            </div>
-
-            <div class="mb-3">
-              <label for="select-format" class="form-label">形式(format)</label>
-              <select class="form-select" name="format" id="select-format">
-                <option>ico</option>
-                <option>png</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="text-center">
-              <button type="submit" class="btn btn-primary btn-lg"><i class="fa fa-download"></i> ダウンロード(Download)</button>
-          </div>
-        </div>
-
-      </div>
-    </fieldset>
-  </form>
-
-  <hr>
-
-  <!-- Footer -->
-  <footer class="py-3">
-    <div class="row">
-      <div class="col-12">
-        <p class="text-muted">
-          Copyright (C) 2021 <a href="https://tsukuba42195.sakura.ne.jp.jp/">Akira Mukai</a><br>
-          Released under the MIT license<br>
-          <a href="http://opensource.org/licenses/mit-license.php" target="_blank">http://opensource.org/licenses/mit-license.php</a>
-        </p>
-      </div>
-    </div>
-  </footer>
-
-</div>
-
-<!-- Bootstrap 5 JavaScript Bundle with Popper -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-  // Bootstrap 5 のツールチップ初期化 (Vanilla JS)
-  var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-  var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-    return new bootstrap.Tooltip(tooltipTriggerEl)
-  });
-
-});
-
-// アイコン検索機能のVanilla JS化
-document.getElementById('faSearch').addEventListener('keyup', function() {
-  var filter = this.value.toLowerCase();
-  var labels = document.querySelectorAll('#fa .fa-icon-label');
-  
-  labels.forEach(function(label) {
-    var text = label.textContent || label.innerText;
-    if (text.toLowerCase().indexOf(filter) > -1) {
-      label.classList.remove('d-none-important');
-      // ラジオボタン本体（直前の要素）も連動させる
-      if(label.previousElementSibling && label.previousElementSibling.classList.contains('btn-check')) {
-        label.previousElementSibling.classList.remove('d-none-important');
-      }
-    } else {
-      label.classList.add('d-none-important');
-      if(label.previousElementSibling && label.previousElementSibling.classList.contains('btn-check')) {
-        label.previousElementSibling.classList.add('d-none-important');
-      }
-    }
-  });
-});
-
-document.addEventListener("DOMContentLoaded", function() {
-  // Bootstrap 5 のツールチップ初期化
-  var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-  var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-    return new bootstrap.Tooltip(tooltipTriggerEl)
-  });
-
-  // カラー連動処理
-  var colorText = document.getElementById('color-text');
-  var colorPicker = document.getElementById('color-picker');
-
-  // ピッカーで色を変えたらテキストに反映
-  colorPicker.addEventListener('input', function() {
-    colorText.value = colorPicker.value;
-  });
-
-  // テキストを直接書き換えたらピッカーに反映（有効なヘキサカラーの場合のみ）
-  colorText.addEventListener('input', function() {
-    var val = colorText.value;
-    // #付きの6桁の16進数チェック
-    if (/^#[0-9A-F]{6}$/i.test(val)) {
-      colorPicker.value = val;
-    }
-  });
-});
-</script>
-
-</body>
-</html>
