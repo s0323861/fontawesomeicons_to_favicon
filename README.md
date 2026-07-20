@@ -41,3 +41,26 @@ UIを **Bootstrap 5** にアップデートし、よりモダンでレスポン�
 
 Copyright 2021-2026 Akira Mukai.  
 Licensed under the [MIT License](LICENSE).
+
+---
+
+## 👨‍💻 開発者（Developer）
+
+**向井 聡 (Akira Mukai)**
+
+Blog
+https://s0323861.github.io/
+
+GitHub
+https://github.com/s0323861
+
+---
+
+## ❤️ サポート（Support）
+
+If this project helped you, consider supporting its development.
+
+☕ Buy me a coffee:
+https://ko-fi.com/akiramukai
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/F1F3RMTFK)
