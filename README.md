@@ -31,10 +31,8 @@ UIを **Bootstrap 5** にアップデートし、よりモダンでレスポン�
 
 本プロジェクトでは、以下の外部ライブラリ等を使用しています：
 * PHP Font Awesome to PNG
-* PHP ICO
 * [Bootstrap 5](https://getbootstrap.com/)
 * jQuery
-* Bootstrap Colorpicker
 
 これらの作品は、その後に変更が加えられている場合であっても、オリジナルのライセンスが適用されます。
 
