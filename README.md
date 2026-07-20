@@ -1,39 +1,46 @@
 # fontawesomeicons_to_favicon
 
-A simple PHP application to convert Font Awesome Icons to favicons. 
-This project has been updated to use **Bootstrap 5** for a more modern and responsive interface.
+<!-- 技術バッジ -->
+![PHP](https://img.shields.io/badge/PHP-%23777BB4.svg?style=flat&logo=php&logoColor=white)
+![Bootstrap](https://img.shields.io/badge/Bootstrap-5.3-%237952B3.svg?style=flat&logo=bootstrap&logoColor=white)
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
 
-## Demo
+Font Awesome Iconsをfavicon（ファビコン）に簡単変換できる、シンプルなPHPアプリケーションです。
+UIを **Bootstrap 5** にアップデートし、よりモダンでレスポンシブなインターフェースに対応しました。
+
+---
+
+## 📸 デモ (Demo)
 
 ![Application Demo](demo.png)
 
-You can try out the live application here:
+実際の動作は以下のURLから確認できます：
 👉 [https://tsukuba42195.sakura.ne.jp/fontawesome_to_favicon/](https://tsukuba42195.sakura.ne.jp/fontawesome_to_favicon/)
 
 ---
 
-## Usage
+## 🚀 使い方 (Usage)
 
-1. Clone or download this repository.
-2. Upload all files to your PHP-enabled web server.
-3. Access the directory via your browser to start generating favicons.
+1. このリポジトリをクローンまたはダウンロードします。
+2. すべてのファイルを、PHPが動作するWebサーバーにアップロードします。
+3. ブラウザから該当のディレクトリにアクセスすれば、すぐにファビコンの生成を開始できます。
 
 ---
 
-## Credits & Externally Licensed Works
+## 🛠️ クレジット・外部ライブラリ (Credits & External Libraries)
 
-This project makes use of certain externally licensed works, including:
+本プロジェクトでは、以下の外部ライブラリ等を使用しています：
 * PHP Font Awesome to PNG
 * PHP ICO
 * [Bootstrap 5](https://getbootstrap.com/)
 * jQuery
 * Bootstrap Colorpicker
 
-Any such works retain their original license, even if they have been subsequently modified.
+これらの作品は、その後に変更が加えられている場合であっても、オリジナルのライセンスが適用されます。
 
 ---
 
-## License
+## 📄 ライセンス (License)
 
 Copyright 2021-2026 Akira Mukai.  
 Licensed under the [MIT License](LICENSE).
