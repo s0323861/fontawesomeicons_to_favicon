@@ -1,4 +1,4 @@
-# Faviconツクール
+# 🚧 Faviconツクール
 
 <!-- 技術バッジ -->
 ![PHP](https://img.shields.io/badge/PHP-%23777BB4.svg?style=flat&logo=php&logoColor=white)
